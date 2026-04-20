@@ -29,7 +29,7 @@ export const THUMBNAIL_DIR = path.resolve(__dirname, "../uploads/thumbnails");
 const validateUploadPaths = () => {
   console.log("validating file upload paths");
 
-  if (!fs.existsSync) {
+  if (!fs.existsSync(UPLOAD_DIR)) {
     console.log("Upload path doesn't exist. Creating it.");
     fs.mkdirSync(UPLOAD_DIR, { recursive: true });
     console.log("File upload path created.");
@@ -37,7 +37,7 @@ const validateUploadPaths = () => {
     console.log("File upload path exists.");
   }
 
-  if (!fs.thumbnailPath) {
+  if (!fs.existsSync(THUMBNAIL_DIR)) {
     console.log("Thumbnail Upload path doesn't exist. Creating it.");
     fs.mkdirSync(THUMBNAIL_DIR, { recursive: true });
     console.log("Thumbnail upload path created.");
