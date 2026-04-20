@@ -62,6 +62,8 @@ export function createApp() {
   });
 
   app.use((Error, req, res, next) => {
+    console.log(Error);
+
     return res.status(500).json({
       message: "Something went wrong",
     });

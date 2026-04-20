@@ -1,8 +1,8 @@
-import multer from "multer";
-import path, { extname } from "path";
 import crypto from "crypto";
-import { fileURLToPath } from "url";
+import multer from "multer";
+import { extname } from "path";
 import { UPLOAD_DIR } from "../app.js";
+import { MulterError } from "multer";
 
 /**
  * TODO: Configure multer for image uploads
@@ -41,12 +41,68 @@ const upload = multer({
       cb(null, UPLOAD_DIR);
     },
     filename: function (req, file, cb) {
-      const newFileName = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}.${extname(file.filename)}`;
+      const newFileName = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}${extname(file.originalname)}`;
       cb(null, newFileName);
     },
   }),
-});
+  fileFilter: function (req, file, cb) {
+    const validFormats = [".jpeg", ".png", ".gif"];
+    const fileExtension = extname(file.originalname).toLowerCase();
+    const isValidFormat = validFormats.includes(fileExtension);
 
-const uploadMiddleware = (req, res, next) => {};
+    if (!isValidFormat) {
+      const err = new Error(
+        `Invalid file format. Allowed formats: ${validFormats.join(", ")}`,
+      );
+      err.code = "INVALID_FILE_TYPE"; // attach custom code
+      return cb(err, false);
+    }
 
-export { upload };
+    cb(null, true);
+  },
+  limits: {
+    fileSize: 1024 * 1024 * 5,
+  },
+}).single("image");
+
+const handleFileUpload = (req, res, next) => {
+  upload(req, res, (err) => {
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({
+          message: err.message,
+        });
+      }
+
+      if (err.code === "INVALID_FILE_TYPE") {
+        return res.status(400).json({
+          message: err.message,
+        });
+      }
+
+      return res.status(500).json({
+        message: err.message ?? "something went wrong while uploading file",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "no file uploaded",
+      });
+    }
+
+    console.log("next is going to execute");
+
+    next();
+  });
+
+  // if (req.file.size > fileSizeLimit) {
+  //   return res.status(400).json({
+  //     success: false,
+  //     message: `File size can't exceed more than 5MB`,
+  //   });
+  // }
+};
+
+export { handleFileUpload };

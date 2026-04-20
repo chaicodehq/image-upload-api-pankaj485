@@ -7,7 +7,7 @@ import {
   downloadThumbnail,
   deleteImage,
 } from "../controllers/image.controller.js";
-import { upload } from "../middlewares/upload.middleware.js";
+import { handleFileUpload } from "../middlewares/upload.middleware.js";
 import { validateObjectId } from "../middlewares/validateObjectId.middleware.js";
 
 /**
@@ -25,6 +25,6 @@ const router = Router();
 
 // Your routes here
 
-router.post("/", upload.single("file"), uploadImage);
+router.post("/", handleFileUpload, uploadImage);
 
 export default router;
