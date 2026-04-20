@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 /**
  * TODO: Define Image schema
@@ -31,7 +31,7 @@ const imageSchema = new mongoose.Schema(
   },
   {
     // Schema options here
-  }
+  },
 );
 
 // TODO: Add indexes
@@ -40,4 +40,4 @@ const imageSchema = new mongoose.Schema(
 // imageSchema.index({ originalName: 'text', description: 'text' });
 
 // TODO: Create and export the Image model
-// export const Image = mongoose.model('Image', imageSchema);
+export const Image = mongoose.model("Image", imageSchema);

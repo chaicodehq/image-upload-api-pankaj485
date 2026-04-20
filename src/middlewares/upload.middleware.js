@@ -1,7 +1,7 @@
-import multer from 'multer';
-import path from 'path';
-import crypto from 'crypto';
-import { fileURLToPath } from 'url';
+import multer from "multer";
+import path from "path";
+import crypto from "crypto";
+import { fileURLToPath } from "url";
 
 /**
  * TODO: Configure multer for image uploads
