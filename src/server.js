@@ -1,6 +1,10 @@
 import { createApp } from "./app.js";
 import { connectDB } from "./db/connect.js";
 
+import * as dotenv from "dotenv";
+
+dotenv.config();
+
 async function start() {
   try {
     // TODO: Read PORT from process.env, default to 3000

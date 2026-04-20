@@ -2,7 +2,7 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { router as iamgeRouter } from "./routes/image.routes";
+import imageRouter from "./routes/image.routes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -23,14 +23,15 @@ const PORT = process.env.PORT || 3000;
  * 8. Return app
  */
 
+export const UPLOAD_DIR = path.resolve(__dirname, "../uploads");
+export const THUMBNAIL_DIR = path.resolve(__dirname, "../uploads/thumbnails");
+
 const validateUploadPaths = () => {
-  const uploadPath = path.resolve(__dirname, "../uploads");
-  const thumbnailPath = path.resolve(__dirname, "../uploads/thumbnails");
   console.log("validating file upload paths");
 
   if (!fs.existsSync) {
     console.log("Upload path doesn't exist. Creating it.");
-    fs.mkdirSync(uploadPath, { recursive: true });
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
     console.log("File upload path created.");
   } else {
     console.log("File upload path exists.");
@@ -38,7 +39,7 @@ const validateUploadPaths = () => {
 
   if (!fs.thumbnailPath) {
     console.log("Thumbnail Upload path doesn't exist. Creating it.");
-    fs.mkdirSync(thumbnailPath, { recursive: true });
+    fs.mkdirSync(THUMBNAIL_DIR, { recursive: true });
     console.log("Thumbnail upload path created.");
   } else {
     console.log("Thumbnail upload path exists.");
@@ -54,7 +55,7 @@ export function createApp() {
     res.status(200).json({ ok: true });
   });
 
-  app.use("/api/images", iamgeRouter);
+  app.use("/api/images", imageRouter);
 
   app.use("*", (req, res) => {
     res.status(404).send("Not found");

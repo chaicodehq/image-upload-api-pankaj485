@@ -1,7 +1,8 @@
 import multer from "multer";
-import path from "path";
+import path, { extname } from "path";
 import crypto from "crypto";
 import { fileURLToPath } from "url";
+import { UPLOAD_DIR } from "../app.js";
 
 /**
  * TODO: Configure multer for image uploads
@@ -33,3 +34,19 @@ import { fileURLToPath } from "url";
  */
 
 // Your code here
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, UPLOAD_DIR);
+    },
+    filename: function (req, file, cb) {
+      const newFileName = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}.${extname(file.filename)}`;
+      cb(null, newFileName);
+    },
+  }),
+});
+
+const uploadMiddleware = (req, res, next) => {};
+
+export { upload };
