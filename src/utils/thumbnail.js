@@ -1,9 +1,9 @@
-import sharp from 'sharp';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import sharp from "sharp";
+import path, { join, resolve } from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const THUMBNAILS_DIR = path.join(__dirname, '../../uploads/thumbnails');
+import { THUMBNAIL_DIR, UPLOAD_DIR } from "../app.js";
 
 /**
  * TODO: Generate thumbnail for uploaded image
@@ -36,6 +36,25 @@ const THUMBNAILS_DIR = path.join(__dirname, '../../uploads/thumbnails');
  */
 export async function generateThumbnail(filename) {
   // Your code here
+  const thumbFileName = `thumb-${filename.split(".")[0]}.jpg`;
+  const thumbPath = join(THUMBNAIL_DIR, thumbFileName);
+  try {
+    await sharp(resolve(UPLOAD_DIR, filename))
+      .resize({
+        width: 200,
+        height: 200,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .jpeg({
+        quality: 80,
+      })
+      .toFile(thumbPath);
+
+    return thumbFileName;
+  } catch (error) {
+    throw new Error("Error generating thumbnail");
+  }
 }
 
 /**
@@ -59,4 +78,10 @@ export async function generateThumbnail(filename) {
  */
 export async function getImageDimensions(filepath) {
   // Your code here
+  const { height, width } = await sharp(filepath).metadata();
+
+  return {
+    height,
+    width,
+  };
 }

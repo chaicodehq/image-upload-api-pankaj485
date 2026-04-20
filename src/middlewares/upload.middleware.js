@@ -92,8 +92,6 @@ const handleFileUpload = (req, res, next) => {
       });
     }
 
-    console.log("next is going to execute");
-
     next();
   });
 

@@ -21,9 +21,35 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export async function uploadImage(req, res, next) {
   try {
     // Your code here
-    return res.status(201).json({
-      message: "file uploaded",
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "No file uploaded",
+      });
+    }
+
+    const file = req.file;
+    const thumbnailFilename = await generateThumbnail(file.filename);
+    const { height, width } = await getImageDimensions(file.path);
+
+    const date = new Date();
+
+    const metaData = await Image.create({
+      description: `Description about ${file.originalname}`,
+      filename: file.filename,
+      height: height,
+      width: width,
+      mimetype: file.mimetype,
+      originalName: file.originalname,
+      size: file.size,
+      tags: ["static", "for", "now"],
+      thumbnailFilename: thumbnailFilename,
+      createdAt: date,
+      updatedAt: date,
+      uploadDate: date,
     });
+
+    return res.status(201).json(metaData);
   } catch (error) {
     next(error);
   }
