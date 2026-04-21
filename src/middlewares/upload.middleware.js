@@ -46,7 +46,7 @@ const upload = multer({
     },
   }),
   fileFilter: function (req, file, cb) {
-    const validFormats = [".jpeg", ".png", ".gif"];
+    const validFormats = [".jpg", ".jpeg", ".png", ".gif"];
     const fileExtension = extname(file.originalname).toLowerCase();
     const isValidFormat = validFormats.includes(fileExtension);
 
@@ -69,6 +69,14 @@ const handleFileUpload = (req, res, next) => {
   upload(req, res, (err) => {
     if (err) {
       if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+          return res.status(400).json({
+            error: {
+              message: "file size exceeds 5MB limit",
+            },
+          });
+        }
+
         return res.status(400).json({
           message: err.message,
         });
@@ -76,7 +84,9 @@ const handleFileUpload = (req, res, next) => {
 
       if (err.code === "INVALID_FILE_TYPE") {
         return res.status(400).json({
-          message: err.message,
+          error: {
+            message: "invalid file type",
+          },
         });
       }
 
@@ -87,8 +97,9 @@ const handleFileUpload = (req, res, next) => {
 
     if (!req.file) {
       return res.status(400).json({
-        success: false,
-        message: "no file uploaded",
+        error: {
+          message: "no file uploaded",
+        },
       });
     }
 

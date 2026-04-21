@@ -34,15 +34,21 @@ export async function uploadImage(req, res, next) {
 
     const date = new Date();
 
+    let tags = [];
+
+    if (req.body.tags) {
+      tags = req.body.tags.split(",").map((_) => _.trim());
+    }
+
     const metaData = await Image.create({
-      description: `Description about ${file.originalname}`,
+      description: req.body?.description ?? "",
       filename: file.filename,
       height: height,
       width: width,
       mimetype: file.mimetype,
       originalName: file.originalname,
       size: file.size,
-      tags: ["static", "for", "now"],
+      tags: tags,
       thumbnailFilename: thumbnailFilename,
       createdAt: date,
       updatedAt: date,
