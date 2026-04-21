@@ -92,10 +92,71 @@ export async function uploadImage(req, res, next) {
  *    - meta: { total, page, limit, pages, totalSize }
  */
 export async function listImages(req, res, next) {
+  const buildQuery = ({
+    page = 1,
+    limit = 10,
+    search,
+    mimetype,
+    sortBy = "uploadDate",
+    sortOrder = "desc",
+  }) => {
+    page = Math.max(1, parseInt(page) || 1);
+    limit = Math.min(50, Math.max(1, parseInt(limit) || 10));
+
+    const skip = (page - 1) * limit;
+
+    const query = {};
+
+    if (mimetype) {
+      query.mimetype = mimetype;
+    }
+
+    if (search) {
+      const regex = new RegExp(search, "i");
+      query.$or = [{ originalName: regex }, { description: regex }];
+    }
+
+    const sort = {
+      [sortBy]: sortOrder === "asc" ? 1 : -1,
+    };
+
+    return {
+      query,
+      sort,
+      skip,
+      limit,
+      page,
+    };
+  };
+
   try {
-    // Your code here
+    const { limit, query, skip, sort, page } = buildQuery(req.query);
+
+    const [imageData, total] = await Promise.all([
+      Image.find(query).sort(sort).skip(skip).limit(limit),
+      Image.countDocuments(query),
+    ]);
+
+    const meta = {
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      limit,
+      totalSize: imageData.reduce((prev, curr) => prev + curr.size, 0),
+    };
+
+    return res.status(200).json({
+      meta,
+      data: imageData,
+    });
   } catch (error) {
-    next(error);
+    // next(error);
+
+    return res.status(500).json({
+      error: {
+        message: "error getting image data",
+      },
+    });
   }
 }
 

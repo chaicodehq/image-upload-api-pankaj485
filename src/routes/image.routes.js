@@ -26,5 +26,6 @@ const router = Router();
 // Your routes here
 
 router.post("/", handleFileUpload, uploadImage);
+router.get("/", listImages);
 
 export default router;
