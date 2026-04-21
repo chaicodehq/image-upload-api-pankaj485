@@ -218,8 +218,11 @@ export async function downloadImage(req, res, next) {
     if (fileOnDisk) {
       const filePath = resolve(UPLOAD_DIR, filename);
 
-      res.setHeader("Content-Type", "image/png");
-      res.setHeader("Content-Disposition", 'attachment; filename="sample.png"');
+      res.setHeader("Content-Type", "image/jpeg");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`,
+      );
 
       return res.sendFile(filePath);
     }
@@ -254,8 +257,43 @@ export async function downloadImage(req, res, next) {
 export async function downloadThumbnail(req, res, next) {
   try {
     // Your code here
+
+    const fileId = req.params.id;
+
+    const { thumbnailFilename: filename } = await Image.findOne(
+      { _id: fileId },
+      { thumbnailFilename: 1, _id: 0 },
+    );
+
+    const fileOnDisk = readdirSync(THUMBNAIL_DIR, {
+      encoding: "utf-8",
+      recursive: true,
+    }).find((_) => _ === filename);
+
+    if (fileOnDisk) {
+      const filePath = resolve(THUMBNAIL_DIR, filename);
+
+      res.setHeader("Content-Type", "image/jpeg");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`,
+      );
+
+      return res.sendFile(filePath);
+    }
+
+    throw new Error("File not found in disk");
+
+    return res.status(200).json(fileOnDisk);
   } catch (error) {
-    next(error);
+    // next(error);
+
+    return res.status(500).json({
+      error: {
+        message:
+          error?.message ?? "something went wrong while getting image data",
+      },
+    });
   }
 }
 

@@ -29,5 +29,6 @@ router.post("/", handleFileUpload, uploadImage);
 router.get("/", listImages);
 router.get("/:id", validateObjectId, getImage);
 router.get("/:id/download", validateObjectId, downloadImage);
+router.get("/:id/thumbnail", validateObjectId, downloadThumbnail);
 
 export default router;
