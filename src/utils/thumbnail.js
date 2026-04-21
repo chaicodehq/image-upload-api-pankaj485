@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import path, { join, resolve } from "path";
 import { fileURLToPath } from "url";
+import { copyFileSync, statSync, writeFileSync } from "fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { THUMBNAIL_DIR, UPLOAD_DIR } from "../app.js";
@@ -38,8 +39,12 @@ export async function generateThumbnail(filename) {
   // Your code here
   const thumbFileName = `thumb-${filename.split(".")[0]}.jpg`;
   const thumbPath = join(THUMBNAIL_DIR, thumbFileName);
+
   try {
-    await sharp(resolve(UPLOAD_DIR, filename))
+    const inputPath = resolve(UPLOAD_DIR, filename);
+    const originalSize = statSync(inputPath).size;
+
+    const buffer = await sharp(inputPath)
       .resize({
         width: 200,
         height: 200,
@@ -49,7 +54,14 @@ export async function generateThumbnail(filename) {
       .jpeg({
         quality: 80,
       })
-      .toFile(thumbPath);
+      .toBuffer();
+
+    // if created file is larger than original one, copy the same one
+    if (buffer.length < originalSize) {
+      writeFileSync(thumbPath, buffer);
+    } else {
+      copyFileSync(inputPath, thumbPath);
+    }
 
     return thumbFileName;
   } catch (error) {

@@ -1,8 +1,9 @@
-import fs from "fs";
-import path from "path";
+import fs, { statSync } from "fs";
+import path, { join } from "path";
 import { fileURLToPath } from "url";
 import { Image } from "../models/image.model.js";
 import { generateThumbnail, getImageDimensions } from "../utils/thumbnail.js";
+import { THUMBNAIL_DIR } from "../app.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -29,8 +30,8 @@ export async function uploadImage(req, res, next) {
     }
 
     const file = req.file;
-    const thumbnailFilename = await generateThumbnail(file.filename);
     const { height, width } = await getImageDimensions(file.path);
+    const thumbnailFilename = await generateThumbnail(file.filename);
 
     const date = new Date();
 
