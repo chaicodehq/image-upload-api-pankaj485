@@ -310,6 +310,37 @@ export async function downloadThumbnail(req, res, next) {
 export async function deleteImage(req, res, next) {
   try {
     // Your code here
+
+    try {
+      const fileId = req.params.id;
+
+      const { thumbnailFilename, filename } = await Image.findOne(
+        { _id: fileId },
+        { thumbnailFilename: 1, filename: 1, _id: 0 },
+      );
+
+      if (!thumbnailFilename || !filename) {
+        throw new Error(
+          "invalid request. file with requested id doesn't exist",
+        );
+      }
+
+      const originalFilePath = resolve(UPLOAD_DIR, filename);
+      const thumbnailPath = resolve(THUMBNAIL_DIR, thumbnailFilename);
+
+      fs.unlinkSync(originalFilePath);
+      fs.unlinkSync(thumbnailPath);
+
+      await Image.deleteOne({ _id: imageId });
+
+      return res.status(204);
+    } catch (error) {
+      return res.status(500).json({
+        error: {
+          message: error?.message ?? "error deleting requested image data",
+        },
+      });
+    }
   } catch (error) {
     next(error);
   }
