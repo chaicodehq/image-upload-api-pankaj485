@@ -1,4 +1,4 @@
-import fs, { readdirSync, statSync } from "fs";
+import fs, { existsSync, readdirSync, statSync } from "fs";
 import path, { join, resolve } from "path";
 import { fileURLToPath } from "url";
 import { Image } from "../models/image.model.js";
@@ -332,12 +332,17 @@ export async function deleteImage(req, res, next) {
       const originalFilePath = resolve(UPLOAD_DIR, filename);
       const thumbnailPath = resolve(THUMBNAIL_DIR, thumbnailFilename);
 
-      fs.unlinkSync(originalFilePath);
-      fs.unlinkSync(thumbnailPath);
+      if (existsSync(originalFilePath)) {
+        fs.unlinkSync(originalFilePath);
+      }
 
-      await Image.deleteOne({ _id: imageId });
+      if (existsSync(thumbnailPath)) {
+        fs.unlinkSync(thumbnailPath);
+      }
 
-      return res.status(204);
+      await Image.deleteOne({ _id: fileId });
+
+      return res.status(204).json();
     } catch (error) {
       return res.status(500).json({
         error: {
