@@ -26,7 +26,7 @@ export async function validateObjectId(req, res, next) {
     if (!existsImage) {
       return res.status(404).json({
         error: {
-          message: "file with provided id not found",
+          message: "image not found",
         },
       });
     }
@@ -35,7 +35,7 @@ export async function validateObjectId(req, res, next) {
   } catch (error) {
     return res.status(400).json({
       error: {
-        message: "invalid file id or id not provided",
+        message: "invalid id format",
       },
     });
   }

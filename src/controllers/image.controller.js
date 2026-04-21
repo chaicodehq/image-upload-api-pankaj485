@@ -225,11 +225,15 @@ export async function downloadImage(req, res, next) {
       );
 
       return res.sendFile(filePath);
+    } else {
+      return res.status(404).json({
+        error: {
+          message: "file not found in disk",
+        },
+      });
     }
 
-    throw new Error("File not found in disk");
-
-    return res.status(200).json(fileOnDisk);
+    throw new Error("error downloading file");
   } catch (error) {
     // next(error);
 
