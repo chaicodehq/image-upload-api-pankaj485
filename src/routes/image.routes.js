@@ -27,5 +27,6 @@ const router = Router();
 
 router.post("/", handleFileUpload, uploadImage);
 router.get("/", listImages);
+router.get("/:id", validateObjectId, getImage);
 
 export default router;

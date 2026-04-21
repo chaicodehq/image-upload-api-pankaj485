@@ -170,8 +170,19 @@ export async function listImages(req, res, next) {
 export async function getImage(req, res, next) {
   try {
     // Your code here
+
+    const imageId = req.params.id;
+
+    const data = await Image.findById(imageId);
+
+    return res.status(200).json(data);
   } catch (error) {
-    next(error);
+    // next(error);
+    return res.status(500).json({
+      error: {
+        message: "something went wrong while getting image data",
+      },
+    });
   }
 }
 
