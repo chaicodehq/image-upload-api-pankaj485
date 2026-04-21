@@ -1,9 +1,9 @@
-import fs, { statSync } from "fs";
-import path, { join } from "path";
+import fs, { readdirSync, statSync } from "fs";
+import path, { join, resolve } from "path";
 import { fileURLToPath } from "url";
 import { Image } from "../models/image.model.js";
 import { generateThumbnail, getImageDimensions } from "../utils/thumbnail.js";
-import { THUMBNAIL_DIR } from "../app.js";
+import { THUMBNAIL_DIR, UPLOAD_DIR } from "../app.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -202,8 +202,40 @@ export async function getImage(req, res, next) {
 export async function downloadImage(req, res, next) {
   try {
     // Your code here
+
+    const fileId = req.params.id;
+
+    const { filename } = await Image.findOne(
+      { _id: fileId },
+      { filename: 1, _id: 0 },
+    );
+
+    const fileOnDisk = readdirSync(UPLOAD_DIR, {
+      encoding: "utf-8",
+      recursive: true,
+    }).find((_) => _ === filename);
+
+    if (fileOnDisk) {
+      const filePath = resolve(UPLOAD_DIR, filename);
+
+      res.setHeader("Content-Type", "image/png");
+      res.setHeader("Content-Disposition", 'attachment; filename="sample.png"');
+
+      return res.sendFile(filePath);
+    }
+
+    throw new Error("File not found in disk");
+
+    return res.status(200).json(fileOnDisk);
   } catch (error) {
-    next(error);
+    // next(error);
+
+    return res.status(500).json({
+      error: {
+        message:
+          error?.message ?? "something went wrong while getting image data",
+      },
+    });
   }
 }
 
